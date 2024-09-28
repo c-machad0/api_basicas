@@ -25,9 +25,15 @@ def create_tasks():
         'description': request_task['description']
     }
 
+    for i in tasks:
+        if i['id'] == request_task['id']:
+            return jsonify('message: Tarefa não pode ser criada. {id} ja existe'), 400
+        elif i['description'] == request_task['description']:
+            return jsonify('message: Tarefa não pode ser criada. {description} ja existe'), 400
+        
     tasks.append(task)
 
-    return jsonify(task)
+    return jsonify(task), 200
 
 @app.route('/tasks/<int:id>', methods=['PUT'])
 def update_task(id):
