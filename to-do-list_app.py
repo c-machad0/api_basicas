@@ -19,21 +19,31 @@ def get_tasks():
 
 @app.route('/tasks', methods=['POST'])
 def create_tasks():
+    # Verifica se a requisição está em JSON
+    if not request.is_json:
+        return jsonify({'message': 'Requisição deve ser em JSON'})
+
     request_task = request.get_json()
-    task = {
-        'id': request_task['id'],
-        'description': request_task['description']
-    }
+    description = request_task.get('description')
 
-    for i in tasks:
-        if i['id'] == request_task['id']:
-            return jsonify('message: Tarefa não pode ser criada. {id} ja existe'), 400
-        elif i['description'] == request_task['description']:
-            return jsonify('message: Tarefa não pode ser criada. {description} ja existe'), 400
+    # Verificar se a requisição foi escrita
+    if not description or len (description) < 3:
+        return jsonify({'message': 'Descrição é obritatória e deve ser maior que 3 caracteres'})
+    
+    # Verifica se ja existe a descrição
+    if any(task['description'] == description for task in tasks):
+        return jsonify({'message': f'A tarefa {description} já existe.'})
+
+    # Verifica o maior numero de id existente e incrementa 1, gerando o proximo id
+    new_id = max([task['id'] for task in tasks], default=0) + 1
+    new_task = {
+        'id': new_id,
+        'description': description
+        }
         
-    tasks.append(task)
+    tasks.append(new_task)
 
-    return jsonify(task), 200
+    return jsonify(new_task), 200
 
 @app.route('/tasks/<int:id>', methods=['PUT'])
 def update_task(id):
